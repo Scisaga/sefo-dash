@@ -2,7 +2,7 @@
 module.exports = {
   content: [
     "./*.html",           // 扫描你当前目录的 HTML 文件
-    "./components/**/*.html",
+    "./pages/**/*.html",
     "./node_modules/preline/**/*.js"
   ],
   safelist: [
