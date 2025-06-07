@@ -1,0 +1,132 @@
+<!-- templates.html -->
+<div x-data="templatesPage()" x-init="$nextTick(() => $data.init())" class="p-4">
+  <!-- 轮播区域 -->
+  <div class="mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="relative">
+        <img src="assets/img/1.jpg" class="w-full h-60 rounded-lg shadow-md object-cover" />
+        <div class="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-base px-3 py-1 rounded">
+          支持多行业通用的自动化流程
+        </div>
+      </div>
+      <div class="relative">
+        <img src="assets/img/2.jpg" class="w-full h-60 rounded-lg shadow-md object-cover" />
+        <div class="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-base px-3 py-1 rounded">
+          一键复制模板，加速业务构建
+        </div>
+      </div>
+      <div class="relative">
+        <img src="assets/img/3.jpg" class="w-full h-60 rounded-lg shadow-md object-cover" />
+        <div class="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-base px-3 py-1 rounded">
+          覆盖从智能推荐到质检分析
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 筛选区域 -->
+  <div class="flex flex-wrap justify-between items-center gap-4 p-4 bg-white rounded shadow border">
+    <div class="flex items-center gap-4 transition-all duration-500 ease-in-out transform" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+      <input type="text" placeholder="搜索模板..." x-model="filters.keyword" class="border px-3 py-2 rounded w-64 text-sm" />
+
+      <!-- 标签筛选 -->
+      <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-1 border px-2 py-1 rounded bg-white text-sm h-10 overflow-auto" @click="$refs.tagFilterInput.focus()">
+          <template x-for="(tag, i) in filters.tags" :key="i">
+            <span class="flex items-center bg-blue-100 text-blue-800 rounded px-2 py-0.5">
+              <span x-text="tag"></span>
+              <button @click="filters.tags.splice(i, 1)" class="ml-1 text-blue-600 hover:text-red-500" type="button">&times;</button>
+            </span>
+          </template>
+          <input x-ref="tagFilterInput" type="text" x-model="tagFilterInput"
+            @keydown.enter.prevent="addFilterTag()"
+            @keydown="if($event.key === ',') { $event.preventDefault(); addFilterTag() }"
+            @blur="addFilterTag()"
+            @keydown.backspace="handleBackspaceOnEmpty()"
+            class="flex-1 min-w-[80px] border-none focus:ring-0 focus:outline-none"
+            placeholder="输入标签回车添加" />
+        </div>
+      </div>
+
+      <!-- 排序方式 -->
+      <select x-model="filters.sort" class="border px-2 py-2 rounded text-sm">
+        <option value="updated">按更新时间</option>
+        <option value="starred">按收藏数</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 模板卡片瀑布流 -->
+  <div class="grid gap-6 mt-6" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+    <template x-for="tpl in filteredTemplates" :key="tpl.id" x-transition:enter="transition transform duration-500" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+      <div class="rounded shadow bg-white overflow-hidden transform transition duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer" data-wf-card @click="handleTemplateClick(tpl)">
+        <img :src="tpl.thumbnail" class="w-full h-40 object-cover" />
+        <div class="px-3 pt-3 pb-2 flex flex-col gap-2">
+          <div class="text-base font-semibold text-gray-900 leading-snug" x-text="tpl.name"></div>
+          <div class="text-sm text-gray-600 leading-snug line-clamp-3" x-text="tpl.description"></div>
+          <div class="flex flex-wrap gap-1">
+            <template x-for="tag in tpl.tags">
+              <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded" x-text="tag"></span>
+            </template>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+            <template x-for="m in tpl.models">
+              <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded flex items-center gap-1">🧠 <span x-text="m"></span></span>
+            </template>
+            <template x-for="a in tpl.apps">
+              <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded flex items-center gap-1">📦 <span x-text="a"></span></span>
+            </template>
+          </div>
+          <div class="flex justify-between items-center text-xs text-gray-400 mt-1">
+            <div>
+              <button class="flex items-center gap-1 text-yellow-500 hover:text-yellow-600" :aria-label="tpl.starred ? '取消收藏' : '添加收藏'" @click.stop="toggleStar(tpl)">
+  <span class="text-xl" :class="tpl.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
+  <span x-text="tpl.starCount"></span>
+</button>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm align-middle">update</span>
+              <span x-text="new Date(tpl.updated_time).toLocaleString()"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <div x-show="loading" x-transition.opacity x-transition.duration.300 class="text-center py-4 text-gray-400 text-sm animate-pulse">加载中...</div>
+  <div x-ref="sentinel"></div>
+
+  <!-- 抽屉层 -->
+  <div x-show="showDetail && selectedTemplate" x-transition class="fixed top-0 right-0 w-full max-w-2xl h-full bg-white shadow-xl border-l z-50" @click.outside="handleOutsideClick">
+    <div class="flex items-center justify-between py-2 px-4 border-b bg-gray-50">
+      <div class="text-lg font-semibold text-gray-800" x-text="selectedTemplate?.name"></div>
+      <div class="flex items-center gap-2">
+        <button class="flex items-center gap-1 me-2 text-yellow-500 hover:text-yellow-600" :aria-label="selectedTemplate?.starred ? '取消收藏' : '添加收藏'" @click="selectedTemplate && toggleStar(selectedTemplate)">
+          <span class="text-2xl" :class="selectedTemplate?.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
+          <span x-text="selectedTemplate?.starCount"></span>
+        </button>
+        <button class="px-3 py-1 h-10 bg-blue-600 text-white text-sm rounded hover:bg-blue-700" @click="forkTemplate(selectedTemplate)">使用该模板</button>
+      </div>
+    </div>
+    <div class="p-6 text-sm overflow-y-auto h-[calc(100%-56px)]">
+      <img :src="selectedTemplate?.thumbnail" class="w-full aspect-video rounded border object-cover" />
+      <div class="text-gray-600 mt-4" x-text="selectedTemplate?.description"></div>
+
+      <div class="flex flex-wrap gap-2 mt-2">
+        <template x-for="tag in selectedTemplate?.tags">
+          <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded" x-text="tag"></span>
+        </template>
+      </div>
+      <div class="flex gap-2 mt-2">
+        <template x-for="m in selectedTemplate?.models">
+          <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs flex items-center gap-1">🧠 <span x-text="m"></span></span>
+        </template>
+        <template x-for="a in selectedTemplate?.apps">
+          <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs flex items-center gap-1">📦 <span x-text="a"></span></span>
+        </template>
+      </div>
+      <div class="mt-2 text-xs text-gray-500">更新时间：<span x-text="new Date(selectedTemplate?.updated_time).toLocaleString()"></span></div>
+    </div>
+  </div>
+</div>

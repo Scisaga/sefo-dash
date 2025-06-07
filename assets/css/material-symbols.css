@@ -1,0 +1,82 @@
+/* === Material Symbols - Local Font Setup === */
+
+/* Outlined - 空心风格（FILL=0） */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  src: url('../fonts/material-symbols-outlined.woff2') format('woff2');
+  font-display: block;
+}
+
+/* Rounded - 实心圆润风格（FILL=1） */
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  font-style: normal;
+  font-weight: 100 700;
+  src: url('../fonts/material-symbols-rounded.woff2') format('woff2');
+  font-display: block;
+}
+
+/* Sharp - 更尖锐风格（FILL=1） */
+@font-face {
+  font-family: 'Material Symbols Sharp';
+  font-style: normal;
+  font-weight: 100 700;
+  src: url('../fonts/material-symbols-sharp.woff2') format('woff2');
+  font-display: block;
+}
+
+/* 图标通用基础样式 */
+.material-symbols-outlined,
+.material-symbols-rounded,
+.material-symbols-sharp {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 变体：空心 Outlined 星星 */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* 变体：实心 Rounded 星星 */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* 变体：实心 Sharp 星星 */
+.material-symbols-sharp {
+  font-family: 'Material Symbols Sharp';
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  src: url('../fonts/Orbitron-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
