@@ -76,3 +76,7 @@ function generateWorkflowStyleBase64(seed = '') {
   });
   return canvas.toDataURL('image/png');
 }
+
+if (typeof module !== 'undefined') {
+  module.exports = generateWorkflowStyleBase64;
+}
