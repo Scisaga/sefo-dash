@@ -57,7 +57,7 @@
   </div>
 
   <!-- 模板卡片瀑布流 -->
-  <div class="grid gap-6 mt-6" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+  <div class="grid gap-6 mt-6" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
     <template x-for="tpl in filteredTemplates" :key="tpl.id" x-transition:enter="transition transform duration-500" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
       <div class="rounded shadow bg-white overflow-hidden transform transition duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer" data-wf-card @click="handleTemplateClick(tpl)">
         <img :src="tpl.thumbnail" class="w-full h-40 object-cover" />
