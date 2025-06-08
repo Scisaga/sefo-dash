@@ -109,7 +109,7 @@
         <button class="px-3 py-1 h-10 bg-blue-600 text-white text-sm rounded hover:bg-blue-700" @click="forkTemplate(selectedTemplate)">使用该模板</button>
       </div>
     </div>
-    <div class="p-6 text-sm overflow-y-auto h-[calc(100%-56px)]">
+    <div class="p-6 text-sm overflow-y-auto h-[calc(100% - 56px)]">
       <img :src="selectedTemplate?.thumbnail" class="w-full aspect-video rounded border object-cover" />
       <div class="text-gray-600 mt-4" x-text="selectedTemplate?.description"></div>
 
