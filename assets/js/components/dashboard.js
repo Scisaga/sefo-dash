@@ -23,7 +23,7 @@ function dashboard() {
       // 先清空再插入 DOM 元素
       this.$refs.mainContainer.innerHTML = '';
 
-      console.log('🔥 插入 templates.html 内容');
+      console.log(`🔥 插入 ${view}.html 内容`);
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
 
