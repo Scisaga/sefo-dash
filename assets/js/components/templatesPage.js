@@ -13,7 +13,6 @@ function templatesPage() {
     hasMore: true,
     selectedTemplate: null,
     showDetail: false,
-    _initialized: false,
 
     get filteredTemplates() {
       let list = this.templates;
