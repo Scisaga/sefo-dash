@@ -26,7 +26,7 @@
 
   <!-- 筛选区域 -->
   <div class="flex flex-wrap justify-between items-center gap-4 p-4 bg-white rounded shadow border">
-    <div class="flex items-center gap-4 transition-all duration-500 ease-in-out transform" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+    <div class="flex items-center gap-4">
       <input type="text" placeholder="搜索模板..." x-model="filters.keyword" class="border px-3 py-2 rounded w-64 text-sm" />
 
       <!-- 标签筛选 -->
@@ -56,9 +56,9 @@
     </div>
   </div>
 
-  <!-- 模板卡片瀑布流 -->
+  <!-- 模板卡片展示 -->
   <div class="grid gap-6 mt-6" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-    <template x-for="tpl in filteredTemplates" :key="tpl.id" x-transition:enter="transition transform duration-500" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+    <template x-for="tpl in filteredTemplates" :key="tpl.id">
       <div class="rounded shadow bg-white overflow-hidden transform transition duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer" data-wf-card @click="handleTemplateClick(tpl)">
         <img :src="tpl.thumbnail" class="w-full h-40 object-cover" />
         <div class="px-3 pt-3 pb-2 flex flex-col gap-2">
@@ -79,10 +79,10 @@
           </div>
           <div class="flex justify-between items-center text-xs text-gray-400 mt-1">
             <div>
-              <button class="flex items-center gap-1 text-yellow-500 hover:text-yellow-600" :aria-label="tpl.starred ? '取消收藏' : '添加收藏'" @click.stop="toggleStar(tpl)">
-  <span class="text-xl" :class="tpl.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
-  <span x-text="tpl.starCount"></span>
-</button>
+              <button class="flex items-center gap-1 text-yellow-500 hover:text-yellow-600" @click.stop="toggleStar(tpl)">
+                <span class="text-xl" :class="tpl.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
+                <span x-text="tpl.starCount"></span>
+              </button>
             </div>
             <div class="flex items-center gap-1">
               <span class="material-symbols-outlined text-sm align-middle">update</span>
@@ -94,7 +94,8 @@
     </template>
   </div>
 
-  <div x-show="loading" x-transition.opacity x-transition.duration.300 class="text-center py-4 text-gray-400 text-sm animate-pulse">加载中...</div>
+  <!-- 加载中指示器 -->
+  <div x-show="loading" class="text-center py-4 text-gray-400 text-sm">加载中...</div>
   <div x-ref="sentinel"></div>
 
   <!-- 抽屉层 -->
@@ -102,23 +103,23 @@
     <div class="flex items-center justify-between py-2 px-4 border-b bg-gray-50">
       <div class="text-lg font-semibold text-gray-800" x-text="selectedTemplate?.name"></div>
       <div class="flex items-center gap-2">
-        <button class="flex items-center gap-1 me-2 text-yellow-500 hover:text-yellow-600" :aria-label="selectedTemplate?.starred ? '取消收藏' : '添加收藏'" @click="selectedTemplate && toggleStar(selectedTemplate)">
-          <span class="text-2xl" :class="selectedTemplate?.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
-          <span x-text="selectedTemplate?.starCount"></span>
+        <button class="flex items-center gap-1 me-2 text-yellow-500 hover:text-yellow-600" @click="toggleStar(selectedTemplate)">
+          <span class="text-2xl" :class="selectedTemplate.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
+          <span x-text="selectedTemplate.starCount"></span>
         </button>
         <button class="px-3 py-1 h-10 bg-blue-600 text-white text-sm rounded hover:bg-blue-700" @click="forkTemplate(selectedTemplate)">使用该模板</button>
       </div>
     </div>
-    <div class="p-6 text-sm overflow-y-auto h-[calc(100% - 56px)]">
-      <img :src="selectedTemplate?.thumbnail" class="w-full aspect-video rounded border object-cover" />
-      <div class="text-gray-600 mt-4" x-text="selectedTemplate?.description"></div>
 
-      <div class="flex flex-wrap gap-2 mt-2">
+    <div class="p-6 text-sm overflow-y-auto h-[calc(100%-56px)] space-y-4">
+      <img :src="selectedTemplate?.thumbnail" class="w-full aspect-video rounded border object-cover" />
+      <div class="text-gray-600" x-text="selectedTemplate?.description"></div>
+      <div class="flex flex-wrap gap-2">
         <template x-for="tag in selectedTemplate?.tags">
           <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded" x-text="tag"></span>
         </template>
       </div>
-      <div class="flex gap-2 mt-2">
+      <div class="flex gap-2">
         <template x-for="m in selectedTemplate?.models">
           <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs flex items-center gap-1">🧠 <span x-text="m"></span></span>
         </template>
@@ -126,7 +127,37 @@
           <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs flex items-center gap-1">📦 <span x-text="a"></span></span>
         </template>
       </div>
-      <div class="mt-2 text-xs text-gray-500">更新时间：<span x-text="new Date(selectedTemplate?.updated_time).toLocaleString()"></span></div>
+      <div class="text-xs text-gray-500">更新时间：<span x-text="new Date(selectedTemplate?.updated_time).toLocaleString()"></span></div>
+
+      <!-- ✅ 频道模板表格 -->
+      <div>
+        <h3 class="text-base font-medium text-blue-700 mb-2">频道模板</h3>
+        <template x-if="selectedTemplate?.channelTemplates?.length">
+          <table class="min-w-full border text-xs text-left">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-2 py-1 border">频道名</th>
+                <th class="px-2 py-1 border">角色</th>
+                <th class="px-2 py-1 border">可添加人数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="channel in selectedTemplate.channelTemplates">
+                <template x-for="role in channel.roles">
+                  <tr>
+                    <td class="px-2 py-1 border" x-text="channel.name"></td>
+                    <td class="px-2 py-1 border" x-text="role.name"></td>
+                    <td class="px-2 py-1 border" x-text="role.max"></td>
+                  </tr>
+                </template>
+              </template>
+            </tbody>
+          </table>
+        </template>
+        <template x-if="!selectedTemplate?.channelTemplates?.length">
+          <p class="text-gray-400 text-sm">无频道模板信息</p>
+        </template>
+      </div>
     </div>
   </div>
 </div>

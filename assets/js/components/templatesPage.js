@@ -34,7 +34,7 @@ function templatesPage() {
     async init() {
       await this.loadMore();
       this.$nextTick(() => {
-        const component = this.$data; // 🟢 正确方式，使用 Alpine 提供的稳定引用
+        const component = this.$data;
         const observer = new IntersectionObserver(entries => {
           if (entries.length && entries[0].isIntersecting) {
             component.loadMore();
@@ -43,7 +43,6 @@ function templatesPage() {
         observer.observe(component.$refs.sentinel);
       });
     },
-
 
     handleTemplateClick(wf) {
       this.selectedTemplate = wf;
@@ -114,6 +113,15 @@ function templatesPage() {
       const models = ['gpt-4o', 'qwen2.5', 'deepseek', 'yi-1.5', 'ChatGLM3'];
       const apps = ['数据采集系统', '运维调度引擎', '质检服务', '流程引擎', '大屏系统'];
 
+      const channelTemplateSamples = [
+        [{ name: '工程师', roles: [{ name: '工程师', max: 1 }] }],
+        [{ name: '客服', roles: [{ name: '客服人员', max: 2 }] }],
+        [{ name: '审批', roles: [{ name: '审核人', max: 2 }] }],
+        [{ name: '调度', roles: [{ name: '调度员', max: 1 }] }],
+        [{ name: '分析', roles: [{ name: '数据分析师', max: 2 }] }],
+        [{ name: '系统通知', roles: [{ name: '系统通知', max: 99 }] }]
+      ];
+
       const dummyData = Array.from({ length: this.perPage }, (_, i) => {
         const now = Date.now();
         return {
@@ -125,9 +133,9 @@ function templatesPage() {
           thumbnail: generateWorkflowStyleBase64(),
           models: [models[Math.floor(Math.random() * models.length)]],
           apps: [apps[Math.floor(Math.random() * apps.length)]],
-          starred: 0,
-          starCount: Math.floor(Math.random() * 20) + 1,
-          forks: Math.floor(Math.random() * 200)
+          starred: Math.random() > 0.7,
+          starCount: Math.floor(Math.random() * 20),
+          channelTemplates: channelTemplateSamples[i % channelTemplateSamples.length]
         };
       });
 
@@ -135,6 +143,6 @@ function templatesPage() {
       this.page++;
       if (this.page > 5) this.hasMore = false;
       this.loading = false;
-    },
+    }
   };
 }

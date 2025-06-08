@@ -16,8 +16,11 @@
     <!-- 组件逻辑 -->
     <script src="assets/js/utils/thumbnail.js" defer></script>
     <script src="assets/js/components/dashboard.js" defer></script>
+
+    <script src="assets/js/components/usersPage.js" defer></script>
     <script src="assets/js/components/workflowPage.js" defer></script>
     <script src="assets/js/components/templatesPage.js" defer></script>
+    <script src="assets/js/components/deploymentsPage.js" defer></script>
 
     
     <!-- Alpine 核心 -->
@@ -51,16 +54,16 @@
             <!-- 菜单列表 -->
             <ul class="space-y-1 px-2 mt-2 text-sm">
                 <template x-for="item in [
-    { label: '我的工作流', icon: 'workflow', route: '#workflow' },
-    { label: '工作流母版中心', icon: 'view_list', route: '#templates' },
-    { label: '会话列表', icon: 'chat', route: '#sessions' },
+    { label: '我的工作流', icon: 'flowchart', route: '#workflow' },
+    { label: '工作流母版中心', icon: 'hub', route: '#templates' },
+    { label: '部署实例', icon: 'forum', route: '#deployments' },
     { label: '用户列表', icon: 'group', route: '#users' },
-    { label: '智能体列表', icon: 'hub', route: '#agents' },
+    { label: '智能体列表', icon: 'view_in_ar', route: '#agents' },
     { label: '应用列表', icon: 'apps', route: '#apps' },
     { label: '数据服务', icon: 'storage', route: '#data' },
     { label: '数据标注', icon: 'flag', route: '#label' },
-    { label: '模型微调', icon: 'science', route: '#fine-tune' }
-  ]" :key="item.icon">
+    { label: '模型微调', icon: 'model_training', route: '#fine-tune' }
+  ]" :key="item.route">
                     <li @click="window.location.hash = item.route" class="cursor-pointer transition-colors duration-100 " :class="[
   currentHash === item.route
     ? 'bg-teal-100 text-teal-700 border-teal-500'

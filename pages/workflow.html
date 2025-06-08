@@ -51,7 +51,7 @@
         <!-- 排序方式 -->
         <select x-model="filters.sort" class="border px-2 py-2 rounded text-sm">
           <option value="updated">按更新时间排序</option>
-          <option value="sessions">按会话数排序</option>
+          <option value="sessions">按实例数排序</option>
           <option value="executions">按执行次数排序</option>
         </select>
       </div>
@@ -75,7 +75,7 @@
         <div class="col-span-4">工作流</div>
         <div class="col-span-2">模型</div>
         <div class="col-span-2">应用</div>
-        <div class="col-span-1 text-center">会话数</div>
+        <div class="col-span-1 text-center">实例数</div>
         <div class="col-span-1 text-center">执行</div>
         <div class="col-span-1 text-right">更新时间</div>
       </div>
@@ -144,8 +144,8 @@
             </template>
           </div>
 
-          <!-- 会话数 -->
-          <div class="col-span-1 text-center text-gray-700" x-text="wf.sessions"></div>
+          <!-- 实例数 -->
+          <div class="col-span-1 text-center text-gray-700" x-text="wf.instances"></div>
 
           <!-- 执行次数 -->
           <div class="col-span-1 text-center text-gray-700" x-text="wf.executions"></div>
@@ -315,9 +315,38 @@
             <div x-text="selectedWorkflow?.executions"></div>
           </div>
           <div>
-            <div class="text-gray-400">会话数</div>
-            <div x-text="selectedWorkflow?.sessions"></div>
+            <div class="text-gray-400">实例数</div>
+            <div x-text="selectedWorkflow?.instances"></div>
           </div>
+        </div>
+
+        <div class="mt-2">
+          <h3 class="text-base font-medium text-blue-700 mb-1">频道模板</h3>
+          <template x-if="selectedWorkflow?.channelTemplates?.length">
+            <table class="min-w-full border text-xs text-left">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="px-2 py-1 border">频道名</th>
+                  <th class="px-2 py-1 border">角色</th>
+                  <th class="px-2 py-1 border">可添加人数</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="channel in selectedWorkflow.channelTemplates">
+                  <template x-for="role in channel.roles">
+                    <tr>
+                      <td class="px-2 py-1 border" x-text="channel.name"></td>
+                      <td class="px-2 py-1 border" x-text="role.name"></td>
+                      <td class="px-2 py-1 border" x-text="role.max"></td>
+                    </tr>
+                  </template>
+                </template>
+              </tbody>
+            </table>
+          </template>
+          <template x-if="!selectedWorkflow?.channelTemplates?.length">
+            <p class="text-gray-400 text-sm">无频道模板信息</p>
+          </template>
         </div>
 
         <!-- Tab 切换 -->
@@ -332,13 +361,6 @@
               @click="tab = 'preview'"
             >预览图</button>
             <button
-              :class="tab === 'sessions'
-                ? 'border-b-2 border-blue-600 text-blue-600 font-medium bg-white'
-                : 'text-gray-500 hover:bg-gray-100'"
-              class="px-4 py-2 rounded-t"
-              @click="tab = 'sessions'"
-            >会话关联</button>
-            <button
               :class="tab === 'stats'
                 ? 'border-b-2 border-blue-600 text-blue-600 font-medium bg-white'
                 : 'text-gray-500 hover:bg-gray-100'"
@@ -351,12 +373,6 @@
           <div class="border border-t-0 rounded-b bg-gray-50 mt-0 p-4 text-sm transition">
             <div x-show="tab === 'preview'">
               <img :src="selectedWorkflow?.thumbnail" class="rounded border object-cover w-full max-w-md" />
-            </div>
-
-            <div x-show="tab === 'sessions'">
-              <p class="text-gray-600">当前工作流关联的会话数量：
-                <span class="font-medium text-gray-800" x-text="selectedWorkflow?.sessions"></span>
-              </p>
             </div>
 
             <div x-show="tab === 'stats'">

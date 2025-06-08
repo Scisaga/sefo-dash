@@ -80,3 +80,80 @@ function generateWorkflowStyleBase64(seed = '') {
 if (typeof module !== 'undefined') {
   module.exports = generateWorkflowStyleBase64;
 }
+
+
+function generateAvatarBase64(seed = '') {
+  // 高质量扰动 hash（更分散）
+  const hash = (() => {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) {
+      h ^= seed.charCodeAt(i) << (i % 8);
+    }
+    return (h * 2654435761) >>> 0;
+  })();
+
+  const rand = (offset, min, max) => {
+    const base = Math.abs(Math.sin(hash + offset) * 10000);
+    return min + Math.floor(base % (max - min + 1));
+  };
+
+  const center = 50;
+  const outerRadius = 35;
+  const innerRadius = outerRadius * 0.5;
+  const spikes = rand(1, 5, 6); // 5 或 6 角星
+  const strokeLayers = rand(2, 1, 3); // 1~3 条边框线
+  const angleOffset = (rand(5, 0, 360) * Math.PI) / 180;
+
+  const baseHue = rand(0, 0, 360);                     // 背景色 H
+  const fillHue = (baseHue + 180) % 360;               // 对比色 H
+  const borderHue = (fillHue + rand(12, -30, 30)) % 360;
+
+  const bgColor = `hsl(${baseHue}, 40%, 92%)`;          // 柔和背景
+  const fillColor = `hsl(${fillHue}, 80%, 55%)`;        // 明亮对比填充
+  const borderColor = (delta) => `hsl(${borderHue}, 80%, ${45 - delta * 8}%)`;
+
+  const getStarPoints = (outer, inner, rotation) => {
+    const points = [];
+    for (let i = 0; i < spikes * 2; i++) {
+      const angle = (Math.PI * i) / spikes + rotation;
+      const radius = i % 2 === 0 ? outer : inner;
+      const x = center + Math.cos(angle) * radius;
+      const y = center + Math.sin(angle) * radius;
+      points.push(`${x.toFixed(2)},${y.toFixed(2)}`);
+    }
+    return points.join(' ');
+  };
+
+  const polygons = [];
+
+  // 填充星形
+  polygons.push(
+    `<polygon points="${getStarPoints(outerRadius, innerRadius, angleOffset)}" 
+              fill="${fillColor}" stroke="none"/>`
+  );
+
+  // 多层边框线
+  for (let i = 0; i < strokeLayers; i++) {
+    const scale = 1 - i * 0.05;
+    polygons.push(
+      `<polygon points="${getStarPoints(
+        outerRadius * scale,
+        innerRadius * scale,
+        angleOffset
+      )}" 
+        fill="none" 
+        stroke="${borderColor(i)}" 
+        stroke-width="2" 
+        stroke-linejoin="round" />`
+    );
+  }
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+      <rect width="100" height="100" rx="12" ry="12" fill="${bgColor}" />
+      ${polygons.join('\n')}
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+}
