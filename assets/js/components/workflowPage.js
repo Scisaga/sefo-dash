@@ -1,4 +1,3 @@
-// 保留原逻辑并为不同工作流定义合理命名的使用者频道模板
 function workflowPage() {
   return {
     workflows: [],
@@ -16,6 +15,10 @@ function workflowPage() {
     selectedWorkflow: null,
     showDetail: false,
     tab: 'preview',
+    tagInput: '',
+    deploying: false,
+    deploymentSelection: {},
+    users: [],
 
     get filteredWorkflows() {
       let list = this.workflows;
@@ -40,6 +43,7 @@ function workflowPage() {
 
     async init() {
       await this.loadMore();
+      await this.fetchUsers();
       this.$nextTick(() => {
         const component = this.$data;
         const observer = new IntersectionObserver(entries => {
@@ -51,43 +55,10 @@ function workflowPage() {
       });
     },
 
-    handleWorkflowClick(wf) {
-      if (!this.showDetail) {
-        this.selectedWorkflow = wf;
-        this.showDetail = true;
-      } else {
-        this.selectedWorkflow = wf;
-      }
-    },
-
-    tagInput: '',
-    addTag() {
-      const trimmed = this.tagInput.trim();
-      if (trimmed && !this.selectedWorkflow.tags.includes(trimmed)) {
-        this.selectedWorkflow.tags.push(trimmed);
-      }
-      this.tagInput = '';
-    },
-
-    addFilterTag() {
-      const trimmed = this.tagFilterInput.trim();
-      if (trimmed && !this.filters.tags.includes(trimmed)) {
-        this.filters.tags.push(trimmed);
-      }
-      this.tagFilterInput = '';
-    },
-
-    handleBackspaceOnEmpty() {
-      if (!this.tagFilterInput && this.filters.tags.length > 0) {
-        this.filters.tags.pop();
-      }
-    },
-
-    handleOutsideClick(event) {
-      const cardClicked = event.target.closest('[data-wf-card]');
-      if (cardClicked) return;
-      this.showDetail = false;
-      this.selectedWorkflow = null;
+    async fetchUsers() {
+      const userPage = usersPage();
+      await userPage.init();
+      this.users = userPage.users;
     },
 
     async loadMore() {
@@ -148,27 +119,31 @@ function workflowPage() {
           name: '地址纠错与标准化流程',
           description: '对用户输入地址进行模糊匹配、补全、结构化转换，解决地址错写、缩写、多级描述等问题',
           channelTemplates: [
-            { name: '地址', roles: [{ name: '地址专员', max: 2 }] } ]
+            { name: '地址', roles: [{ name: '地址专员', max: 2 }] }
+          ]
         },
         {
           name: '智能营销线索打标签流程',
           description: '根据用户行为路径和兴趣偏好，自动标注营销标签，实现个性化推荐和后续销售自动跟进',
           channelTemplates: [
-            { name: '销售跟进', roles: [{ name: '营销顾问', max: 3 }] } ]
+            { name: '销售跟进', roles: [{ name: '营销顾问', max: 3 }] }
+          ]
         },
         {
           name: '多语种 FAQ 自动应答流程',
           description: '支持中文、英文等多语种 FAQ 问题自动识别、分类和准确答复，提升客服处理效率与体验',
           channelTemplates: [
             { name: '语言', roles: [{ name: '语言专家', max: 2 }] },
-            { name: '客服', roles: [{ name: '客服人员', max: 2 }] } ]
+            { name: '客服', roles: [{ name: '客服人员', max: 2 }] }
+          ]
         },
         {
           name: '合同审批流数字化重建',
           description: '将传统线下合同流程数字化改造，整合审批节点、版本比对和归档流程，实现全流程智能化自动处理',
           channelTemplates: [
             { name: '合同', roles: [{ name: '法务人员', max: 1 }, { name: '审核人', max: 2 }] },
-            { name: '文档', roles: [{ name: '文档管理员', max: 1 }] } ]
+            { name: '文档', roles: [{ name: '文档管理员', max: 1 }] }
+          ]
         }
       ];
 
@@ -214,5 +189,53 @@ function workflowPage() {
       if (this.page > 5) this.hasMore = false;
       this.loading = false;
     },
+
+    handleWorkflowClick(wf) {
+      this.showDetail = false;
+      this.deploying = false;
+      this.tab = 'preview';
+      this.deploymentSelection = {};
+
+      setTimeout(() => {
+        this.selectedWorkflow = { ...wf };
+        this.showDetail = true;
+      }, 0); // 让 Alpine 先清空，再注入，强制触发绑定
+    },
+
+    handleOutsideClick(event) {
+      const cardClicked = event.target.closest('[data-wf-card]');
+      if (cardClicked) return;
+      this.showDetail = false;
+      this.selectedWorkflow = null;
+      this.deploying = false;
+    },
+
+    addTag() {
+      const trimmed = this.tagInput.trim();
+      if (trimmed && !this.selectedWorkflow.tags.includes(trimmed)) {
+        this.selectedWorkflow.tags.push(trimmed);
+      }
+      this.tagInput = '';
+    },
+
+    addFilterTag() {
+      const trimmed = this.tagFilterInput.trim();
+      if (trimmed && !this.filters.tags.includes(trimmed)) {
+        this.filters.tags.push(trimmed);
+      }
+      this.tagFilterInput = '';
+    },
+
+    handleBackspaceOnEmpty() {
+      if (!this.tagFilterInput && this.filters.tags.length > 0) {
+        this.filters.tags.pop();
+      }
+    },
+
+    executeDeployment() {
+      console.log('部署选择：', this.deploymentSelection);
+      alert(`工作流 "${this.selectedWorkflow.name}" 已部署（模拟）！`);
+      this.deploying = false;
+    }
   };
 }

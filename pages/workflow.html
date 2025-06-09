@@ -165,233 +165,240 @@
   </div>
   
   <!-- 工作流详情抽屉层 -->
-  <div
-    x-show="showDetail && selectedWorkflow"
-    x-transition:enter="transition transform ease-out duration-300"
-    x-transition:enter-start="translate-x-full"
-    x-transition:enter-end="translate-x-0"
-    x-transition:leave="transition transform ease-in duration-300"
-    x-transition:leave-start="translate-x-0"
-    x-transition:leave-end="translate-x-full"
-    x-cloak
-    class="fixed top-0 right-0 w-full max-w-2xl h-full bg-white shadow-xl border-l border-gray-200 z-40"
-    @click.outside="handleOutsideClick($event)"
-  >
-    <!-- 抽屉头部 -->
-    <div class="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
+  <!-- 抽屉详情 -->
+  <template x-if="selectedWorkflow">
+    <div x-show="showDetail"
+         x-transition:enter="transition transform ease-out duration-300"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition transform ease-in duration-300"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         x-cloak
+         class="fixed top-0 right-0 w-full max-w-2xl h-full bg-white shadow-xl border-l border-gray-200 z-40"
+         @click.outside="handleOutsideClick($event)">
 
-      <template x-if="selectedWorkflow">
+      <!-- 顶部栏：根据 deploying 切换标题/按钮 -->
+      <div class="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
         <div class="flex items-center gap-2">
-          <button @click="showDetail = false" class="text-gray-600 hover:text-gray-800">
-            <span class="material-symbols-outlined">arrow_back</span>
-          </button>
-          <input type="text"
-                 class="text-lg font-semibold text-gray-800 w-full border-b focus:outline-none focus:border-blue-500"
-                 x-model="selectedWorkflow.name"
-          />
+          <template x-if="deploying">
+            <button @click="deploying = false" class="text-gray-600 hover:text-gray-800">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+          </template>
+          <template x-if="deploying">
+            <div class="text-lg font-semibold text-gray-800" x-text="`${selectedWorkflow.name} 的部署`"></div>
+          </template>
+          <template x-if="!deploying">
+            <input type="text" class="text-lg font-semibold text-gray-800 w-full border-b focus:outline-none focus:border-blue-500"
+                   x-model="selectedWorkflow.name" />
+          </template>
         </div>
-        <button
-          @click="selectedWorkflow.starred = !selectedWorkflow.starred"
-          class="text-yellow-500 hover:text-yellow-600"
-          :aria-label="selectedWorkflow?.starred ? '取消收藏' : '添加收藏'"
-        >
-          <span
-            class="text-2xl"
-            :class="selectedWorkflow.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'"
-            x-text="'star'">
-          </span>
-        </button>
-      </template>
-    </div>
+        <div class="flex gap-2 items-center">
+          <button x-show="!deploying"
+                  @click="selectedWorkflow.starred = !selectedWorkflow.starred"
+                  class="text-yellow-500 hover:text-yellow-600"
+                  :aria-label="selectedWorkflow?.starred ? '取消收藏' : '添加收藏'">
+            <span class="text-2xl"
+                  :class="selectedWorkflow.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'"
+                  x-text="'star'"></span>
+          </butto>
+          <template x-if="!deploying && selectedWorkflow.status === 'active'">
+            <button @click="deploying = true"
+                    class="inline-flex items-center gap-1 bg-green-600 text-white text-sm font-medium px-4 py-1.5 rounded hover:bg-green-700 transition">
+              <span class="material-symbols-outlined text-base">rocket_launch</span> 部署
+            </button>
+          </template>
+        </div>
+      </div>
 
-    <!-- 抽屉内容区域 -->
-    <div class="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
+    <div class="flex-1 overflow-y-auto p-6 text-sm">
 
-
-        <!-- 顶部信息行 -->
-        <div class="flex items-start gap-4">
-          <img :src="selectedWorkflow?.thumbnail" class="w-32 h-32 rounded border object-cover" />
-          <div class="flex-1 space-y-3">
-
-
-              <!-- 标签显示与编辑 -->
+      <!-- ✅ 原工作流详情 -->
+      <div x-show="!deploying"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 translate-x-4"
+        x-transition:enter-end="opacity-100 translate-x-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-x-0"
+        x-transition:leave-end="opacity-0 -translate-x-4">
+        <div class="space-y-6">
+          <div class="flex items-start gap-4">
+            <img :src="selectedWorkflow.thumbnail" class="w-32 h-32 rounded border object-cover" />
+            <div class="flex-1 space-y-3">
+              <!-- 标签 -->
               <div>
                 <h3 class="text-xs text-gray-500 mb-1">标签</h3>
                 <div class="flex flex-wrap items-center gap-1 border px-1 py-1 rounded text-sm bg-white"
-                       @click="$refs.tagInput.focus()">
-                    
-                    <!-- 标签展示 -->
-                  <template x-for="(tag, i) in selectedWorkflow?.tags" :key="i">
+                     @click="$refs.tagInput.focus()">
+                  <template x-for="(tag, i) in selectedWorkflow.tags" :key="i">
                     <span class="flex items-center bg-blue-100 text-blue-800 rounded px-2 py-0.5">
                       <span x-text="tag"></span>
                       <button @click="selectedWorkflow.tags.splice(i, 1)"
-                              class="ml-1 text-blue-600 hover:text-red-500"
-                              type="button">&times;</button>
+                              class="ml-1 text-blue-600 hover:text-red-500" type="button">&times;</button>
                     </span>
                   </template>
-
-                  <!-- 输入框 -->
-                  <input
-                    x-ref="tagInput"
-                    type="text"
-                    x-model="tagInput"
-                    @keydown.enter.prevent="addTag()"
-                    @keydown="if($event.key === ',') { $event.preventDefault(); addTag() }"
-                    @blur="addTag()"
-                    placeholder="输入后回车或逗号添加"
-                    class="flex-1 min-w-[80px] border-none focus:ring-0 focus:outline-none"
-                  />
+                  <input x-ref="tagInput" type="text" x-model="tagInput"
+                         @keydown.enter.prevent="addTag()"
+                         @keydown="if($event.key === ',') { $event.preventDefault(); addTag() }"
+                         @blur="addTag()" placeholder="输入后回车或逗号添加"
+                         class="flex-1 min-w-[80px] border-none focus:ring-0 focus:outline-none" />
                 </div>
               </div>
 
               <!-- 描述 -->
               <div>
                 <h3 class="text-xs text-gray-500 mb-1">描述</h3>
-                <template x-if="selectedWorkflow">
-                  <textarea
-                    class="w-full border rounded px-2 py-1 text-sm text-gray-700"
-                    rows="3"
-                    :disabled="!selectedWorkflow"
-                    x-model="selectedWorkflow.description"
-                  ></textarea>
-                </template>
+                <textarea class="w-full border rounded px-2 py-1 text-sm text-gray-700" rows="3"
+                          x-model="selectedWorkflow.description"></textarea>
               </div>
 
               <!-- 状态切换 -->
-              <template x-if="selectedWorkflow">
-                <div class="inline-flex rounded overflow-hidden border text-sm">
-                  <button
-                    class="px-3 py-1 transition"
-                    :class="selectedWorkflow.status === 'active'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-white text-gray-500 hover:bg-gray-100'"
-                    @click="selectedWorkflow.status = 'active'"
-                  >启用中</button>
-                  <button
-                    class="px-3 py-1 transition"
-                    :class="selectedWorkflow.status === 'paused'
-                      ? 'bg-gray-200 text-gray-700'
-                      : 'bg-white text-gray-500 hover:bg-gray-100'"
-                    @click="selectedWorkflow.status = 'paused'"
-                  >已暂停</button>
-                </div>
+              <div class="inline-flex rounded overflow-hidden border text-sm">
+                <button class="px-3 py-1 transition"
+                        :class="selectedWorkflow.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-white text-gray-500 hover:bg-gray-100'"
+                        @click="selectedWorkflow.status = 'active'">启用中</button>
+                <button class="px-3 py-1 transition"
+                        :class="selectedWorkflow.status === 'paused' ? 'bg-gray-200 text-gray-700' : 'bg-white text-gray-500 hover:bg-gray-100'"
+                        @click="selectedWorkflow.status = 'paused'">已暂停</button>
+              </div>
+            </div>
+          </div>
 
+          <!-- 模型 / 应用 / 时间信息 -->
+          <div class="flex text-sm gap-2 mt-4">
+            <div class="text-gray-500 w-12 shrink-0">模型</div>
+            <div class="flex flex-wrap gap-2">
+              <template x-for="m in selectedWorkflow.models">
+                <span class="px-1 py-1 bg-green-100 text-green-800 rounded text-xs flex items-center gap-1">🧠 <span x-text="m"></span></span>
               </template>
+            </div>
           </div>
-        </div>
 
-        <!-- 模型 -->
-        <div class="flex text-sm gap-2 mt-4">
-          <div class="text-gray-500 w-12 shrink-0">模型</div>
-          <div class="flex flex-wrap gap-2">
-            <template x-for="m in selectedWorkflow?.models">
-              <span class="px-1 py-1 bg-green-100 text-green-800 rounded text-xs flex items-center gap-1">
-                🧠 <span x-text="m"></span>
-              </span>
-            </template>
+          <div class="flex text-sm gap-2 mt-2">
+            <div class="text-gray-500 w-12 shrink-0">应用</div>
+            <div class="flex flex-wrap gap-2">
+              <template x-for="a in selectedWorkflow.apps">
+                <span class="px-1 py-1 bg-purple-100 text-purple-700 rounded text-xs flex items-center gap-1">📦 <span x-text="a"></span></span>
+              </template>
+            </div>
           </div>
-        </div>
 
-        <!-- 应用 -->
-        <div class="flex text-sm gap-2 mt-2">
-          <div class="text-gray-500 w-12 shrink-0">应用</div>
-          <div class="flex flex-wrap gap-2">
-            <template x-for="a in selectedWorkflow?.apps">
-              <span class="px-1 py-1 bg-purple-100 text-purple-700 rounded text-xs flex items-center gap-1">
-                📦 <span x-text="a"></span>
-              </span>
-            </template>
+          <div class="grid grid-cols-3 gap-4 text-xs text-gray-600 mt-2">
+            <div>
+              <div class="text-gray-400">更新时间</div>
+              <div x-text="new Date(selectedWorkflow.updated_time).toLocaleString()"></div>
+            </div>
+            <div>
+              <div class="text-gray-400">执行次数</div>
+              <div x-text="selectedWorkflow.executions"></div>
+            </div>
+            <div>
+              <div class="text-gray-400">实例数</div>
+              <div x-text="selectedWorkflow.instances"></div>
+            </div>
           </div>
-        </div>
 
-        <!-- 信息概览 -->
-        <div class="grid grid-cols-3 gap-4 text-xs text-gray-600 mt-2">
+          <!-- 频道模板表格 -->
           <div>
-            <div class="text-gray-400">更新时间</div>
-            <div x-text="new Date(selectedWorkflow?.updated_time).toLocaleString()"></div>
-          </div>
-          <div>
-            <div class="text-gray-400">执行次数</div>
-            <div x-text="selectedWorkflow?.executions"></div>
-          </div>
-          <div>
-            <div class="text-gray-400">实例数</div>
-            <div x-text="selectedWorkflow?.instances"></div>
-          </div>
-        </div>
-
-        <div class="mt-2">
-          <h3 class="text-base font-medium text-blue-700 mb-1">频道模板</h3>
-          <template x-if="selectedWorkflow?.channelTemplates?.length">
-            <table class="min-w-full border text-xs text-left">
-              <thead class="bg-gray-100">
-                <tr>
-                  <th class="px-2 py-1 border">频道名</th>
-                  <th class="px-2 py-1 border">角色</th>
-                  <th class="px-2 py-1 border">可添加人数</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template x-for="channel in selectedWorkflow.channelTemplates">
-                  <template x-for="role in channel.roles">
-                    <tr>
-                      <td class="px-2 py-1 border" x-text="channel.name"></td>
-                      <td class="px-2 py-1 border" x-text="role.name"></td>
-                      <td class="px-2 py-1 border" x-text="role.max"></td>
-                    </tr>
+            <h3 class="text-base font-medium text-blue-700 mb-1">频道模板</h3>
+            <template x-if="selectedWorkflow.channelTemplates?.length">
+              <table class="min-w-full border text-xs text-left">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="px-2 py-1 border">频道名</th>
+                    <th class="px-2 py-1 border">角色</th>
+                    <th class="px-2 py-1 border">可添加人数</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="channel in selectedWorkflow.channelTemplates">
+                    <template x-for="role in channel.roles">
+                      <tr>
+                        <td class="px-2 py-1 border" x-text="channel.name"></td>
+                        <td class="px-2 py-1 border" x-text="role.name"></td>
+                        <td class="px-2 py-1 border" x-text="role.max"></td>
+                      </tr>
+                    </template>
                   </template>
-                </template>
-              </tbody>
-            </table>
-          </template>
-          <template x-if="!selectedWorkflow?.channelTemplates?.length">
-            <p class="text-gray-400 text-sm">无频道模板信息</p>
-          </template>
-        </div>
-
-        <!-- Tab 切换 -->
-        <div class="mt-6">
-          <!-- Tab 标签 -->
-          <div class="flex gap-2 border-b text-sm">
-            <button
-              :class="tab === 'preview'
-                ? 'border-b-2 border-blue-600 text-blue-600 font-medium bg-white'
-                : 'text-gray-500 hover:bg-gray-100'"
-              class="px-4 py-2 rounded-t"
-              @click="tab = 'preview'"
-            >预览图</button>
-            <button
-              :class="tab === 'stats'
-                ? 'border-b-2 border-blue-600 text-blue-600 font-medium bg-white'
-                : 'text-gray-500 hover:bg-gray-100'"
-              class="px-4 py-2 rounded-t"
-              @click="tab = 'stats'"
-            >执行统计</button>
+                </tbody>
+              </table>
+            </template>
+            <template x-if="!selectedWorkflow.channelTemplates?.length">
+              <p class="text-gray-400 text-sm">无频道模板信息</p>
+            </template>
           </div>
 
-          <!-- 内容 -->
-          <div class="border border-t-0 rounded-b bg-gray-50 mt-0 p-4 text-sm transition">
-            <div x-show="tab === 'preview'">
-              <img :src="selectedWorkflow?.thumbnail" class="rounded border object-cover w-full max-w-md" />
+          <!-- Tab 切换 -->
+          <div class="mt-6">
+            <div class="flex gap-2 border-b text-sm">
+              <button class="px-4 py-2 rounded-t"
+                      :class="tab === 'preview' ? 'border-b-2 border-blue-600 text-blue-600 font-medium bg-white' : 'text-gray-500 hover:bg-gray-100'"
+                      @click="tab = 'preview'">预览图</button>
+              <button class="px-4 py-2 rounded-t"
+                      :class="tab === 'stats' ? 'border-b-2 border-blue-600 text-blue-600 font-medium bg-white' : 'text-gray-500 hover:bg-gray-100'"
+                      @click="tab = 'stats'">执行统计</button>
             </div>
-
-            <div x-show="tab === 'stats'">
-              <p class="text-gray-600">执行总次数：
-                <span class="font-medium text-gray-800" x-text="selectedWorkflow?.executions"></span>
-              </p>
-              <p class="text-gray-600 mt-1">更新时间：
-                <span class="font-medium text-gray-800" x-text="selectedWorkflow? new Date(selectedWorkflow.updated_time).toLocaleString() : ''"></span>
-              </p>
+            <div class="border border-t-0 rounded-b bg-gray-50 mt-0 p-4 text-sm transition">
+              <div x-show="tab === 'preview'">
+                <img :src="selectedWorkflow.thumbnail" class="rounded border object-cover w-full max-w-md" />
+              </div>
+              <div x-show="tab === 'stats'">
+                <p class="text-gray-600">执行总次数：
+                  <span class="font-medium text-gray-800" x-text="selectedWorkflow.executions"></span>
+                </p>
+                <p class="text-gray-600 mt-1">更新时间：
+                  <span class="font-medium text-gray-800"
+                        x-text="new Date(selectedWorkflow.updated_time).toLocaleString()"></span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
+      </div>
+
+
+
+      <!-- ✅ 部署配置界面 -->
+      <div x-show="deploying"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 translate-x-4"
+        x-transition:enter-end="opacity-100 translate-x-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-x-0"
+        x-transition:leave-end="opacity-0 -translate-x-4">
+        <div class="space-y-6">
+          <template x-for="channel in selectedWorkflow.channelTemplates" :key="channel.name">
+            <div class="border rounded px-2 py-2 mb-2 bg-gray-50 shadow-sm">
+              <div class="font-semibold text-blue-800 mb-1" x-text="channel.name"></div>
+              <template x-for="role in channel.roles" :key="role.name">
+                <div class="mb-2">
+                  <div class="text-sm text-gray-500 mb-1">
+                    <span class="font-medium" x-text="role.name"></span>（最多 <span x-text="role.max"></span> 人）
+                  </div>
+                  <select multiple class="border px-2 py-1 rounded text-sm w-full"
+                          x-model="deploymentSelection[channel.name + '-' + role.name]">
+                    <template x-for="user in users">
+                      <option :value="user" x-text="user.nickname + '（' + user.username + '）'"></option>
+                    </template>
+                  </select>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <div class="pt-4">
+            <button @click="executeDeployment"
+                    class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition text-sm font-semibold">
+              执行部署
+            </button>
+          </div>
+        </div>
+      </div>
 
     </div>
-
-
   </div>
-
 
 
 </div>
