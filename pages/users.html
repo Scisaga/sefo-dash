@@ -13,25 +13,25 @@
         <select x-model="filters.status" class="border px-2 py-2 rounded text-sm">
           <option value="">全部状态</option>
           <option value="active">启用中</option>
-          <option value="disabled">已禁用</option>
+          <option value="in_active">已禁用</option>
         </select>
       </div>
     </div>
 
     <!-- 表头 -->
     <div class="grid grid-cols-12 gap-4 px-4 py-2 text-sm text-gray-500 border-b bg-gray-50">
-
       <div class="col-span-1">头像</div>
       <div class="col-span-1">ID</div>
       <div class="col-span-2">用户名</div>
       <div class="col-span-2">昵称</div>
-      <div class="col-span-3">邮箱</div>
-      <div class="col-span-1">权限</div>
-      <div class="col-span-2">状态</div>
+      <div class="col-span-2">邮箱</div>
+      <div class="col-span-2">角色</div>
+      <div class="col-span-1">状态</div>
+      <div class="col-span-1">创建时间</div>
     </div>
 
     <!-- 用户数据行 -->
-    <template x-for="user in filteredUsers" :key="user.id">
+    <template x-for="user in users" :key="user.id">
       <div class="grid grid-cols-12 gap-4 px-4 py-3 text-sm border-b items-center hover:bg-gray-50">
         <!-- 头像 -->
         <div class="col-span-1">
@@ -50,22 +50,22 @@
         <div class="col-span-2 text-gray-700" x-text="user.nickname"></div>
 
         <!-- 邮箱 -->
-        <div class="col-span-3 text-gray-600 truncate" x-text="user.email"></div>
+        <div class="col-span-2 text-gray-600 truncate" x-text="user.email"></div>
 
-        <!-- 权限 -->
-        <div class="col-span-1">
-          <span class="px-2 py-0.5 rounded text-xs"
-                :class="user.role === 'admin' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'"
-                x-text="user.role === 'admin' ? '管理员' : '用户'"></span>
+        <!-- 角色（将空格字符串拆分展示） -->
+        <div class="col-span-2 flex flex-wrap gap-1 text-xs">
+          <template x-for="role in user.roles.split(' ')" :key="role">
+            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700" x-text="role"></span>
+          </template>
         </div>
 
         <!-- 状态切换开关 -->
-        <div class="col-span-2">
+        <div class="col-span-1">
           <label class="inline-flex items-center cursor-pointer">
             <input type="checkbox" class="sr-only"
                    :checked="user.status === 'active'"
                    @change="user.status = user.status === 'active' ? 'disabled' : 'active'" />
-            <div class="w-10 h-5 bg-gray-200 rounded-full relative transition peer-checked:bg-green-400"
+            <div class="w-10 h-5 bg-gray-200 rounded-full relative transition"
                  :class="user.status === 'active' ? 'bg-green-400' : 'bg-gray-200'">
               <div class="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform"
                    :class="user.status === 'active' ? 'translate-x-5' : 'translate-x-0'"></div>
@@ -73,8 +73,15 @@
             <span class="ml-2 text-xs text-gray-600" x-text="user.status === 'active' ? '启用中' : '已禁用'"></span>
           </label>
         </div>
-
+        <!-- 创建时间 -->
+        <div class="col-span-1 text-right text-gray-400 text-xs leading-tight">
+          <div x-text="new Date(user.create_at).toLocaleDateString()"></div>
+          <div x-text="new Date(user.create_at).toLocaleTimeString().slice(0, 8)"></div>
+        </div>
+     
       </div>
+
+      
     </template>
 
     <!-- 加载中指示器 -->

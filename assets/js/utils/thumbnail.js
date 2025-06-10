@@ -1,4 +1,5 @@
 function generateWorkflowStyleBase64(seed = '') {
+
   const canvas = document.createElement('canvas');
   canvas.width = 96;
   canvas.height = 96;
@@ -77,83 +78,48 @@ function generateWorkflowStyleBase64(seed = '') {
   return canvas.toDataURL('image/png');
 }
 
-if (typeof module !== 'undefined') {
-  module.exports = generateWorkflowStyleBase64;
-}
-
 
 function generateAvatarBase64(seed = '') {
-  // 高质量扰动 hash（更分散）
-  const hash = (() => {
-    let h = 0;
-    for (let i = 0; i < seed.length; i++) {
-      h ^= seed.charCodeAt(i) << (i % 8);
-    }
-    return (h * 2654435761) >>> 0;
-  })();
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
 
-  const rand = (offset, min, max) => {
-    const base = Math.abs(Math.sin(hash + offset) * 10000);
-    return min + Math.floor(base % (max - min + 1));
-  };
-
-  const center = 50;
-  const outerRadius = 35;
-  const innerRadius = outerRadius * 0.5;
-  const spikes = rand(1, 5, 6); // 5 或 6 角星
-  const strokeLayers = rand(2, 1, 3); // 1~3 条边框线
-  const angleOffset = (rand(5, 0, 360) * Math.PI) / 180;
-
-  const baseHue = rand(0, 0, 360);                     // 背景色 H
-  const fillHue = (baseHue + 180) % 360;               // 对比色 H
-  const borderHue = (fillHue + rand(12, -30, 30)) % 360;
-
-  const bgColor = `hsl(${baseHue}, 40%, 92%)`;          // 柔和背景
-  const fillColor = `hsl(${fillHue}, 80%, 55%)`;        // 明亮对比填充
-  const borderColor = (delta) => `hsl(${borderHue}, 80%, ${45 - delta * 8}%)`;
-
-  const getStarPoints = (outer, inner, rotation) => {
-    const points = [];
-    for (let i = 0; i < spikes * 2; i++) {
-      const angle = (Math.PI * i) / spikes + rotation;
-      const radius = i % 2 === 0 ? outer : inner;
-      const x = center + Math.cos(angle) * radius;
-      const y = center + Math.sin(angle) * radius;
-      points.push(`${x.toFixed(2)},${y.toFixed(2)}`);
-    }
-    return points.join(' ');
-  };
-
-  const polygons = [];
-
-  // 填充星形
-  polygons.push(
-    `<polygon points="${getStarPoints(outerRadius, innerRadius, angleOffset)}" 
-              fill="${fillColor}" stroke="none"/>`
-  );
-
-  // 多层边框线
-  for (let i = 0; i < strokeLayers; i++) {
-    const scale = 1 - i * 0.05;
-    polygons.push(
-      `<polygon points="${getStarPoints(
-        outerRadius * scale,
-        innerRadius * scale,
-        angleOffset
-      )}" 
-        fill="none" 
-        stroke="${borderColor(i)}" 
-        stroke-width="2" 
-        stroke-linejoin="round" />`
-    );
+  // 简单哈希函数
+  function hashString(str) {
+    return [...str].reduce((acc, c) => acc * 31 + c.charCodeAt(0), 7) >>> 0;
   }
 
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-      <rect width="100" height="100" rx="12" ry="12" fill="${bgColor}" />
-      ${polygons.join('\n')}
-    </svg>
-  `.trim();
+  const hash = hashString(seed);
+  const rand = (i) => Math.abs((Math.sin(hash + i) * 10000) % 1);
 
-  return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+  // 渐变背景（线性）
+  const gradient = ctx.createLinearGradient(0, 0, size, size);
+  gradient.addColorStop(0, `hsl(${(hash % 360)}, 60%, 70%)`);
+  gradient.addColorStop(1, `hsl(${(hash * 3 % 360)}, 70%, 60%)`);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+
+  // 抽象装饰图形（随机圆点）
+  for (let i = 0; i < 5; i++) {
+    const x = size * rand(i + 1);
+    const y = size * rand(i + 2);
+    const r = 5 + 8 * rand(i + 3);
+    ctx.beginPath();
+    ctx.globalAlpha = 0.2 + 0.3 * rand(i + 4);
+    ctx.fillStyle = `hsl(${(hash * (i + 5)) % 360}, 80%, 80%)`;
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // 中心字母
+  const char = seed[0]?.toUpperCase() || '?';
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 28px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(char, size / 2, size / 2);
+
+  return canvas.toDataURL('image/png');
 }

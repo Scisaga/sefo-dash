@@ -58,10 +58,10 @@
 
   <!-- 模板卡片展示 -->
   <div class="grid gap-6 mt-6" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-    <template x-for="tpl in filteredTemplates" :key="tpl.id">
+    <template x-for="tpl in templates" :key="tpl.id">
       <div class="rounded shadow bg-white overflow-hidden transform transition duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer" data-wf-card @click="handleTemplateClick(tpl)">
         <img :src="tpl.thumbnail" class="w-full h-40 object-cover" />
-        <div class="px-3 pt-3 pb-2 flex flex-col gap-2">
+        <div class="px-3 pt-3 pb-1 flex flex-col gap-2">
           <div class="text-base font-semibold text-gray-900 leading-snug" x-text="tpl.name"></div>
           <div class="text-sm text-gray-600 leading-snug line-clamp-3" x-text="tpl.description"></div>
           <div class="flex flex-wrap gap-1">
@@ -77,7 +77,7 @@
               <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded flex items-center gap-1">📦 <span x-text="a"></span></span>
             </template>
           </div>
-          <div class="flex justify-between items-center text-xs text-gray-400 mt-1">
+          <div class="flex justify-between items-center text-xs text-gray-400">
             <div>
               <button class="flex items-center gap-1 text-yellow-500 hover:text-yellow-600" @click.stop="toggleStar(tpl)">
                 <span class="text-xl" :class="tpl.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
@@ -99,27 +99,40 @@
   <div x-ref="sentinel"></div>
 
   <!-- 抽屉层 -->
-  <div x-show="showDetail && selectedTemplate" x-transition class="fixed top-0 right-0 w-full max-w-2xl h-full bg-white shadow-xl border-l z-50" @click.outside="handleOutsideClick">
-    <div class="flex items-center justify-between py-2 px-4 border-b bg-gray-50">
+  <div x-show="showDetail && selectedTemplate" 
+    x-transition:enter="transition transform ease-out duration-300"
+    x-transition:enter-start="translate-x-full opacity-0"
+    x-transition:enter-end="translate-x-0 opacity-100"
+    x-transition:leave="transition transform ease-in duration-200"
+    x-transition:leave-start="translate-x-0 opacity-100"
+    x-transition:leave-end="translate-x-full opacity-0"
+    x-cloak
+    class="fixed top-0 right-0 w-full max-w-2xl h-full bg-white shadow-xl border-l z-50" @click.outside="handleOutsideClick">
+    <div class="flex items-center justify-between h-14 px-4 border-b bg-gray-50">
       <div class="text-lg font-semibold text-gray-800" x-text="selectedTemplate?.name"></div>
       <div class="flex items-center gap-2">
-        <button class="flex items-center gap-1 me-2 text-yellow-500 hover:text-yellow-600" @click="toggleStar(selectedTemplate)">
-          <span class="text-2xl" :class="selectedTemplate.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
-          <span x-text="selectedTemplate.starCount"></span>
-        </button>
-        <button class="px-3 py-1 h-10 bg-blue-600 text-white text-sm rounded hover:bg-blue-700" @click="forkTemplate(selectedTemplate)">使用该模板</button>
+        <template x-if="selectedTemplate">
+          <button class="flex items-center gap-1 me-2 text-yellow-500 hover:text-yellow-600" @click="toggleStar(selectedTemplate)">
+            <span class="text-2xl" :class="selectedTemplate.starred ? 'material-symbols-rounded' : 'material-symbols-outlined'" x-text="'star'"></span>
+            <span x-text="selectedTemplate.starCount"></span>
+          </button>
+        </template>
+
+        <button class="px-3 py-1 h-10 bg-blue-600 text-white text-sm rounded hover:bg-blue-700" @click="forkTemplate(selectedTemplate)">使用</button>
       </div>
     </div>
 
-    <div class="p-6 text-sm overflow-y-auto h-[calc(100%-56px)] space-y-4">
+    <div class="p-6 text-sm overflow-y-auto h-full">
+
       <img :src="selectedTemplate?.thumbnail" class="w-full aspect-video rounded border object-cover" />
-      <div class="text-gray-600" x-text="selectedTemplate?.description"></div>
-      <div class="flex flex-wrap gap-2">
+
+      <div class="text-gray-600 mt-2" x-text="selectedTemplate?.description"></div>
+      <div class="flex flex-wrap gap-2 mt-2">
         <template x-for="tag in selectedTemplate?.tags">
           <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded" x-text="tag"></span>
         </template>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 mt-2">
         <template x-for="m in selectedTemplate?.models">
           <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs flex items-center gap-1">🧠 <span x-text="m"></span></span>
         </template>
@@ -127,11 +140,12 @@
           <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs flex items-center gap-1">📦 <span x-text="a"></span></span>
         </template>
       </div>
-      <div class="text-xs text-gray-500">更新时间：<span x-text="new Date(selectedTemplate?.updated_time).toLocaleString()"></span></div>
+
+      <div class="text-xs text-gray-500 mt-2">更新时间：<span x-text="new Date(selectedTemplate?.updated_time).toLocaleString()"></span></div>
 
       <!-- ✅ 频道模板表格 -->
       <div>
-        <h3 class="text-base font-medium text-blue-700 mb-2">频道模板</h3>
+        <h3 class="text-base font-medium text-blue-700 mb-2 mt-2">频道模板</h3>
         <template x-if="selectedTemplate?.channelTemplates?.length">
           <table class="min-w-full border text-xs text-left">
             <thead class="bg-gray-100">

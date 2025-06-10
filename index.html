@@ -12,22 +12,26 @@
 
     <script src="node_modules/preline/preline.js"></script>
 
-
     <!-- 组件逻辑 -->
-    <script src="assets/js/utils/thumbnail.js" defer></script>
-    <script src="assets/js/components/dashboard.js" defer></script>
+    <script src="assets/js/utils/thumbnail.js"></script>
 
-    <script src="assets/js/components/usersPage.js" defer></script>
-    <script src="assets/js/components/workflowPage.js" defer></script>
-    <script src="assets/js/components/templatesPage.js" defer></script>
-    <script src="assets/js/components/deploymentsPage.js" defer></script>
+    <script src="assets/js/store/fetchUserList.js"></script>
+    <script src="assets/js/store/fetchWorkflowList.js"></script>
+    <script src="assets/js/store/fetchTemplateList.js"></script>
+    <script src="assets/js/store/fetchDeploymentList.js"></script>
 
-    
+
+    <script src="assets/js/components/dashboard.js"></script>
+    <script src="assets/js/components/usersPage.js"></script>
+    <script src="assets/js/components/workflowPage.js"></script>
+    <script src="assets/js/components/templatesPage.js"></script>
+    <script src="assets/js/components/deploymentsPage.js"></script>
+
     <!-- Alpine 核心 -->
-    <script src="assets/js/alpine.min.js" defer></script>
+    <script src="node_modules/alpinejs/dist/cdn.min.js"></script>
 
     <!-- 初始化绑定 -->
-    <script src="assets/js/init-alpine.js" defer></script>
+    <script src="assets/js/init-alpine.js"></script>
 
 </head>
 
@@ -54,23 +58,24 @@
             <!-- 菜单列表 -->
             <ul class="space-y-1 px-2 mt-2 text-sm">
                 <template x-for="item in [
-    { label: '我的工作流', icon: 'flowchart', route: '#workflow' },
-    { label: '工作流母版中心', icon: 'hub', route: '#templates' },
-    { label: '部署实例', icon: 'forum', route: '#deployments' },
-    { label: '用户列表', icon: 'group', route: '#users' },
-    { label: '智能体列表', icon: 'view_in_ar', route: '#agents' },
-    { label: '应用列表', icon: 'apps', route: '#apps' },
-    { label: '数据服务', icon: 'storage', route: '#data' },
-    { label: '数据标注', icon: 'flag', route: '#label' },
-    { label: '模型微调', icon: 'model_training', route: '#fine-tune' }
-  ]" :key="item.route">
+                  { label: '我的工作流', icon: 'flowchart', route: '#workflow' },
+                  { label: '工作流母版中心', icon: 'hub', route: '#templates' },
+                  { label: '实例频道', icon: 'forum', route: '#deployments' },
+                  { label: '用户列表', icon: 'group', route: '#users' },
+                  { label: '模型服务', icon: 'view_in_ar', route: '#models' },
+                  { label: '提示词管理', icon: 'lightbulb', route: '#prompts' },
+                  { label: '应用列表', icon: 'apps', route: '#apps' },
+                  { label: '数据服务', icon: 'storage', route: '#data' },
+                  { label: '数据标注', icon: 'flag', route: '#label' },
+                  { label: '模型微调', icon: 'model_training', route: '#fine-tune' }
+                ]" :key="item.route">
                     <li @click="window.location.hash = item.route" class="cursor-pointer transition-colors duration-100 " :class="[
-  currentHash === item.route
-    ? 'bg-teal-100 text-teal-700 border-teal-500'
-    : 'hover:bg-stone-50 hover:text-stone-700 text-stone-700 border-transparent',
-  open ? 'p-2 flex items-center gap-3 justify-start rounded-md'
-       : 'p-2 flex items-center justify-center rounded-md'
-]">
+                      currentHash === item.route
+                        ? 'bg-teal-100 text-teal-700 border-teal-500'
+                        : 'hover:bg-stone-50 hover:text-stone-700 text-stone-700 border-transparent',
+                      open ? 'p-2 flex items-center gap-3 justify-start rounded-md'
+                           : 'p-2 flex items-center justify-center rounded-md'
+                    ]">
                         <span class="material-symbols-outlined text-2xl" :class="currentHash === item.route ? 'font-bold' : ''" x-text="item.icon"></span>
                         <span class="transition-all duration-300 truncate" :style="open ? 'opacity:1; max-width:180px;' : 'opacity:0; max-width:0px;'">
                             <span x-text="item.label"></span>
