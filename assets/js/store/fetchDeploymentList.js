@@ -1,5 +1,22 @@
+/**
+ * 部署列表数据获取模块
+ * 提供工作流部署列表的模拟数据获取功能，支持分页和筛选
+ * @module store/fetchDeploymentList
+ */
+
+/**
+ * 获取部署列表数据
+ * @param {Object} filters - 筛选条件
+ * @param {string} [filters.ticketId] - 工单ID筛选
+ * @param {string} [filters.workflowName] - 工作流名称筛选
+ * @param {string} [filters.channelRole] - 频道角色筛选
+ * @param {number} [page=1] - 页码
+ * @param {number} [perPage=10] - 每页数量
+ * @returns {Promise<Array>} 部署列表数据
+ */
 window.fetchDeploymentList = async function(filters = {}, page = 1, perPage = 10) {
   
+  // 模拟网络延迟
   await new Promise(r => setTimeout(r, 300));
 
   const channelTemplates = {
@@ -45,6 +62,10 @@ window.fetchDeploymentList = async function(filters = {}, page = 1, perPage = 10
 
   const names = Object.keys(channelTemplates);
 
+  /**
+   * 生成随机用户信息
+   * @returns {Object} 包含姓名和头像的用户信息
+   */
   const randUser = () => {
     const p = ['张','李','王','刘','陈','杨','赵','黄'];
     const s = ['伟','芳','娜','敏','静','强','磊','军'];
@@ -52,6 +73,7 @@ window.fetchDeploymentList = async function(filters = {}, page = 1, perPage = 10
     return { name, avatar: window.generateAvatarBase64(name) };
   };
 
+  // 生成模拟数据
   const dummyData = Array.from({ length: perPage }, (_, i) => {
     const name = names[Math.floor(Math.random() * names.length)];
     const id = `deploy-${page}-${i}`;
@@ -59,6 +81,7 @@ window.fetchDeploymentList = async function(filters = {}, page = 1, perPage = 10
     const tokens = executions * 1000;
     const gas = executions * 30;
 
+    // 生成频道数据
     const channels = channelTemplates[name].map(t => ({
       name: t.name,
       roles: t.roles,
@@ -82,13 +105,12 @@ window.fetchDeploymentList = async function(filters = {}, page = 1, perPage = 10
     };
   });
 
-
+  // 根据筛选条件过滤数据
   return dummyData.filter(d => {
-        return (!filters.ticketId || d.ticketId.includes(filters.ticketId)) &&
-               (!filters.workflowName || d.workflow_name.includes(filters.workflowName)) &&
-               (!filters.channelRole || d.channels.some(c =>
-                  c.roles.some(r => r.includes(filters.channelRole)) ||
-                  c.users.some(u => u.includes(filters.channelRole))));
-      });
-
+    return (!filters.ticketId || d.ticketId.includes(filters.ticketId)) &&
+           (!filters.workflowName || d.workflow_name.includes(filters.workflowName)) &&
+           (!filters.channelRole || d.channels.some(c =>
+              c.roles.some(r => r.includes(filters.channelRole)) ||
+              c.users.some(u => u.includes(filters.channelRole))));
+  });
 };

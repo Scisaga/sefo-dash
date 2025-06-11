@@ -1,6 +1,12 @@
+/**
+ * 部署管理页面组件
+ * 负责工作流部署列表的展示、筛选和详情查看
+ */
 function deploymentsPage() {
   return {
+    // 部署列表数据
     deployments: [],
+    // 筛选条件
     filters: {
       ticketId: '',
       workflowName: '',
@@ -13,18 +19,29 @@ function deploymentsPage() {
     selected: null,
 
     showDetail: false,
+    /**
+     * 查看部署详情
+     * @param {Object} deploy - 部署对象
+     */
     viewDetail(deploy) {
-
       this.selected = deploy;
       this.showDetail = true;
     },
 
+    /**
+     * 删除部署
+     * @param {Object} deploy - 部署对象
+     */
     remove(deploy) {
       this.deployments = this.deployments.filter(d => d.id !== deploy.id);
       this.selected = null;
       this.showDetail = false;
     },
 
+    /**
+     * 初始化页面
+     * 设置无限滚动
+     */
     async init() {
       await this.loadMore();
       this.$nextTick(() => {
@@ -35,6 +52,9 @@ function deploymentsPage() {
       });
     },
 
+    /**
+     * 加载更多部署数据
+     */
     async loadMore() {
       if (this.loading || !this.hasMore) return;
       this.loading = true;

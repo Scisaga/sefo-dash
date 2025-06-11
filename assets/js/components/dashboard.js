@@ -1,18 +1,33 @@
+/**
+ * 仪表盘主组件
+ * 提供整体布局、路由管理、时间更新和状态显示功能
+ * @module components/dashboard
+ */
+
 function dashboard() {
   return {
-    timeFull: '',
-    runningCount: 3,
+    timeFull: '',      // 完整时间显示
+    runningCount: 3,   // 运行中的任务数
     quota: {
-      token: 3200,
-      gas: 1840,
+      token: 3200,     // Token 配额
+      gas: 1840,       // Gas 配额
     },
-    currentHash: '',
+    currentHash: '',   // 当前路由 hash
 
+    /**
+     * 更新时间显示
+     * 使用中文格式显示当前时间
+     */
     updateTime() {
       const now = new Date();
       this.timeFull = now.toLocaleString('zh-CN');
     },
 
+    /**
+     * 加载页面内容
+     * 根据路由 hash 加载对应的 HTML 页面
+     * @param {string} hash - 路由 hash 值
+     */
     async loadContent(hash) {
       this.currentHash = hash;
 
@@ -36,11 +51,21 @@ function dashboard() {
       Alpine.initTree(this.$refs.mainContainer);
     },
 
+    /**
+     * 处理路由变化
+     * 当 hash 变化时重新加载页面内容
+     */
     handleRouteChange() {
       const hash = location.hash || '#workflow';
       this.loadContent(hash);
     },
 
+    /**
+     * 初始化函数
+     * 设置时间更新定时器
+     * 初始化路由
+     * 监听路由变化
+     */
     init() {
       this.updateTime();
       setInterval(() => this.updateTime(), 1000);

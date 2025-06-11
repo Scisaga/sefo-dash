@@ -1,15 +1,22 @@
-<!-- users.html -->
+<!--
+  用户管理页面
+  功能：
+  1. 用户列表展示
+  2. 用户搜索和状态筛选
+  3. 用户状态切换
+  4. 无限滚动加载
+-->
 <div x-data="usersPage()" x-init="$nextTick(() => $data.init())" class="p-4">
   <div class="bg-white shadow-md rounded overflow-hidden">
 
-    <!-- 筛选区域 -->
+    <!-- 筛选区域：包含搜索框和状态筛选 -->
     <div class="flex justify-between items-center gap-4 p-4 border-b">
       <div class="flex flex-wrap items-center gap-4">
-        <!-- 用户名搜索 -->
+        <!-- 用户名搜索框 -->
         <input type="text" placeholder="搜索用户名..." x-model="filters.keyword"
                class="border px-3 py-2 rounded w-64 text-sm" />
 
-        <!-- 状态筛选 -->
+        <!-- 用户状态筛选下拉框 -->
         <select x-model="filters.status" class="border px-2 py-2 rounded text-sm">
           <option value="">全部状态</option>
           <option value="active">启用中</option>
@@ -18,7 +25,7 @@
       </div>
     </div>
 
-    <!-- 表头 -->
+    <!-- 表头：定义用户列表各列的标题 -->
     <div class="grid grid-cols-12 gap-4 px-4 py-2 text-sm text-gray-500 border-b bg-gray-50">
       <div class="col-span-1">头像</div>
       <div class="col-span-1">ID</div>
@@ -30,10 +37,10 @@
       <div class="col-span-1">创建时间</div>
     </div>
 
-    <!-- 用户数据行 -->
+    <!-- 用户列表：使用无限滚动加载 -->
     <template x-for="user in users" :key="user.id">
       <div class="grid grid-cols-12 gap-4 px-4 py-3 text-sm border-b items-center hover:bg-gray-50">
-        <!-- 头像 -->
+        <!-- 用户头像 -->
         <div class="col-span-1">
           <div class="w-10 h-10 rounded-full overflow-hidden border">
             <img :src="user.avatar" class="object-cover w-full h-full" />
@@ -46,20 +53,20 @@
         <!-- 用户名 -->
         <div class="col-span-2 font-medium text-gray-800" x-text="user.username"></div>
 
-        <!-- 昵称 -->
+        <!-- 用户昵称 -->
         <div class="col-span-2 text-gray-700" x-text="user.nickname"></div>
 
-        <!-- 邮箱 -->
+        <!-- 用户邮箱 -->
         <div class="col-span-2 text-gray-600 truncate" x-text="user.email"></div>
 
-        <!-- 角色（将空格字符串拆分展示） -->
+        <!-- 用户角色：将空格分隔的角色字符串转换为标签展示 -->
         <div class="col-span-2 flex flex-wrap gap-1 text-xs">
           <template x-for="role in user.roles.split(' ')" :key="role">
             <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700" x-text="role"></span>
           </template>
         </div>
 
-        <!-- 状态切换开关 -->
+        <!-- 用户状态切换开关：支持启用/禁用状态切换 -->
         <div class="col-span-1">
           <label class="inline-flex items-center cursor-pointer">
             <input type="checkbox" class="sr-only"
@@ -73,18 +80,16 @@
             <span class="ml-2 text-xs text-gray-600" x-text="user.status === 'active' ? '启用中' : '已禁用'"></span>
           </label>
         </div>
-        <!-- 创建时间 -->
+
+        <!-- 用户创建时间 -->
         <div class="col-span-1 text-right text-gray-400 text-xs leading-tight">
           <div x-text="new Date(user.create_at).toLocaleDateString()"></div>
           <div x-text="new Date(user.create_at).toLocaleTimeString().slice(0, 8)"></div>
         </div>
-     
       </div>
-
-      
     </template>
 
-    <!-- 加载中指示器 -->
+    <!-- 加载状态指示器 -->
     <div x-show="loading" class="text-center py-4 text-gray-400 text-sm">加载中...</div>
     <div x-ref="sentinel"></div>
   </div>

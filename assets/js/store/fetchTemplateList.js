@@ -1,3 +1,19 @@
+/**
+ * 模板列表数据获取模块
+ * 提供工作流模板列表的模拟数据获取功能，支持分页、筛选和排序
+ * @module store/fetchTemplateList
+ */
+
+/**
+ * 获取模板列表数据
+ * @param {Object} filters - 筛选条件
+ * @param {string} [filters.keyword] - 关键词搜索
+ * @param {string[]} [filters.tags] - 标签筛选
+ * @param {string} [filters.sort] - 排序方式（'updated' 或 'starred'）
+ * @param {number} [page=1] - 页码
+ * @param {number} [perPage=10] - 每页数量
+ * @returns {Promise<Array>} 模板列表数据
+ */
 window.fetchTemplateList = async function(filters = {}, page = 1, perPage = 10) {
   await new Promise(r => setTimeout(r, 400));
 
